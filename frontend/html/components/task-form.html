@@ -1,105 +1,63 @@
-<form id="task-form" class="task-form">
-    <!-- Título: Texto corto (Obligatorio) -->
+<form id="task-form" class="task-form" novalidate>
     <div class="form-group">
-        <label for="task-title">Título *</label>
+        <label for="task-name">Nombre de la tarea *</label>
         <input 
             type="text" 
-            id="task-title" 
-            name="title" 
+            id="task-name" 
+            name="nombre" 
             placeholder="Ej. Rediseñar vista de inicio" 
-            required 
+            autocomplete="off"
         />
+        <span class="error-message" id="error-task-name"></span>
     </div>
 
-    <!-- Descripción: Texto largo (Opcional) -->
     <div class="form-group">
-        <label for="task-description">Descripción</label>
+        <label for="task-description">Descripción *</label>
         <textarea 
             id="task-description" 
-            name="description" 
+            name="descripcion" 
             rows="3" 
-            placeholder="Detalles adicionales sobre la tarea..."
+            placeholder="Detalles sobre lo que se debe realizar en la tarea..."
         ></textarea>
+        <span class="error-message" id="error-task-description"></span>
     </div>
 
-    <!-- Prioridad: Selector (Obligatorio) -->
     <div class="form-group">
-        <label for="task-priority">Prioridad *</label>
-        <select id="task-priority" name="priority" required>
-            <option value="" disabled selected>Selecciona una prioridad</option>
-            <option value="low">Baja</option>
-            <option value="medium">Media</option>
-            <option value="high">Alta</option>
-        </select>
+        <label for="task-assignee">Asignado a *</label>
+        <input 
+            type="text" 
+            id="task-assignee" 
+            name="asignadoA" 
+            placeholder="Ej. Julian Lozano" 
+            autocomplete="off"
+        />
+        <span class="error-message" id="error-task-assignee"></span>
     </div>
 
-    <!-- Fecha límite: Selector de fecha (Obligatorio) -->
     <div class="form-group">
-        <label for="task-due-date">Fecha límite *</label>
+        <label for="task-due-date">Fecha de Entrega *</label>
         <input 
             type="date" 
             id="task-due-date" 
-            name="dueDate" 
-            required 
+            name="fechaDeEntrega" 
         />
+        <span class="error-message" id="error-task-due-date"></span>
     </div>
 
-    <!-- Fecha planificada: Selector de fecha (Opcional) -->
     <div class="form-group">
-        <label for="task-planned-date">Fecha planificada</label>
-        <input 
-            type="date" 
-            id="task-planned-date" 
-            name="plannedDate" 
-        />
+        <label for="task-status">Estado *</label>
+        <select id="task-status" name="estado">
+            <option value="" disabled selected>Selecciona un estado</option>
+            <option value="POR HACER">POR HACER</option>
+            <option value="EN PROCESO">EN PROCESO</option>
+            <option value="REVISIÓN">REVISIÓN</option>
+            <option value="HECHO">HECHO</option>
+        </select>
+        <span class="error-message" id="error-task-status"></span>
     </div>
 
-    <!-- Duración estimada: Input numérico en minutos (Opcional) -->
-    <div class="form-group">
-        <label for="task-estimated-duration">Duración estimada (minutos)</label>
-        <input 
-            type="number" 
-            id="task-estimated-duration" 
-            name="estimatedDuration" 
-            min="1" 
-            step="1" 
-            placeholder="Ej. 45" 
-        />
-    </div>
-
-    <!-- Hora de inicio: Selector de hora (Opcional) -->
-    <div class="form-group">
-        <label for="task-start-time">Hora de inicio</label>
-        <input 
-            type="time" 
-            id="task-start-time" 
-            name="startTime" 
-        />
-    </div>
-
-    <!-- Categoría: Selector o etiqueta personalizada (Obligatorio) -->
-    <div class="form-group">
-        <label for="task-category">Categoría *</label>
-        <input 
-            type="text" 
-            id="task-category" 
-            name="category" 
-            list="category-suggestions" 
-            placeholder="Selecciona o escribe una categoría" 
-            required 
-        />
-        <datalist id="category-suggestions">
-            <option value="Trabajo"></option>
-            <option value="Estudio"></option>
-            <option value="Personal"></option>
-            <option value="Proyectos"></option>
-            <option value="Salud"></option>
-        </datalist>
-    </div>
-
-    <!-- Botones de acción -->
     <div class="form-actions">
-        <button type="submit" id="btn-submit-task">Guardar Tarea</button>
-        <button type="reset" id="btn-reset-task">Limpiar</button>
+        <button type="submit" id="btn-submit-task" class="btn btn-primary">Agregar Tarea</button>
+        <button type="reset" id="btn-reset-task" class="btn btn-secondary">Limpiar</button>
     </div>
 </form>

@@ -1,0 +1,22 @@
+.app-header {
+    background-color: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.25rem 1.5rem;
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.app-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    letter-spacing: -0.5px;
+}
+
+.app-tagline {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
