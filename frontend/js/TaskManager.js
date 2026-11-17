@@ -1,7 +1,27 @@
 class TaskManager {
-    constructor() {
+    constructor(storageAdapter = (typeof taskStorage !== 'undefined' ? taskStorage : null)) {
         this.tasks = [];
         this.currentId = 1;
+        this.storageAdapter = storageAdapter;
+    }
+
+    save() {
+        if (this.storageAdapter && typeof this.storageAdapter.save === 'function') {
+            return this.storageAdapter.save(this.tasks, this.currentId);
+        }
+        return false;
+    }
+
+    load() {
+        if (this.storageAdapter && typeof this.storageAdapter.load === 'function') {
+            const data = this.storageAdapter.load();
+            if (data && Array.isArray(data.tasks)) {
+                this.tasks = data.tasks;
+                this.currentId = Number(data.currentId) || 1;
+                return true;
+            }
+        }
+        return false;
     }
 
     getAllTasks() {
@@ -28,6 +48,7 @@ class TaskManager {
         }
 
         this.tasks.push(newTask);
+        this.save();
         return newTask;
     }
 
@@ -40,13 +61,18 @@ class TaskManager {
         const numericId = Number(taskId);
         const initialLength = this.tasks.length;
         this.tasks = this.tasks.filter(task => task.id !== numericId);
-        return this.tasks.length < initialLength;
+        const wasDeleted = this.tasks.length < initialLength;
+        if (wasDeleted) {
+            this.save();
+        }
+        return wasDeleted;
     }
 
     updateTask(taskId, status) {
         const task = this.getTaskById(taskId);
         if (task) {
             task.estado = status;
+            this.save();
             return task;
         }
         return null;
@@ -56,6 +82,7 @@ class TaskManager {
         const task = this.getTaskById(taskId);
         if (task) {
             task.asignadoA = assignee;
+            this.save();
             return task;
         }
         return null;

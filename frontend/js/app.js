@@ -16,6 +16,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const dueDateInput = document.getElementById('task-due-date');
     const statusInput = document.getElementById('task-status');
 
+    function setMinDueDate() {
+        if (dueDateInput && typeof getTodayString === 'function') {
+            dueDateInput.min = getTodayString();
+        }
+    }
+
+    // Inicializar límite de fecha mínima (hoy) y cargar tareas persistidas
+    setMinDueDate();
+    taskManager.load();
+
     function updateTasksView() {
         const allTasks = taskManager.getAllTasks();
         const count = allTasks.length;
@@ -60,9 +70,12 @@ document.addEventListener('DOMContentLoaded', () => {
             clearTaskFormErrors();
         });
 
-        // Limpiar errores visuales al resetear el formulario
+        // Limpiar errores visuales y restaurar fecha mínima al resetear el formulario
         taskForm.addEventListener('reset', () => {
-            setTimeout(clearTaskFormErrors, 0);
+            setTimeout(() => {
+                clearTaskFormErrors();
+                setMinDueDate();
+            }, 0);
         });
 
         // Limpiar el mensaje de error del campo que se está editando
