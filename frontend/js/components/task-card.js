@@ -19,6 +19,10 @@ function createTaskCard(task) {
     card.setAttribute('data-task-id', task.id);
 
     const badgeClass = getStatusBadgeClass(task.estado);
+    const isDone = task.estado === 'HECHO';
+    const doneButtonHTML = isDone
+        ? `<button type="button" class="btn btn-done done-button" data-task-id="${task.id}" disabled>Completada</button>`
+        : `<button type="button" class="btn btn-done done-button" data-task-id="${task.id}">Marcar como hecha</button>`;
 
     card.innerHTML = `
         <div class="task-card-header">
@@ -37,6 +41,7 @@ function createTaskCard(task) {
             </div>
         </div>
         <div class="task-card-actions">
+            ${doneButtonHTML}
             <button type="button" class="btn btn-delete" data-task-id="${task.id}">Eliminar</button>
         </div>
     `;

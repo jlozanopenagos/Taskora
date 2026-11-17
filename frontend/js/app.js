@@ -29,6 +29,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function renderTasks() {
+        if (typeof taskManager.render === 'function' && tasksContainer) {
+            taskManager.render(tasksContainer);
+        }
+        updateTasksView();
+    }
+
     if (taskForm) {
         // Enviar formulario y registrar la tarea
         taskForm.addEventListener('submit', (event) => {
@@ -46,16 +53,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 estado: statusInput.value
             };
 
-            const newTask = taskManager.addTask(taskData);
-            const taskCardElement = createTaskCard(newTask);
-
-            if (tasksContainer) {
-                tasksContainer.appendChild(taskCardElement);
-            }
+            taskManager.addTask(taskData);
+            renderTasks();
 
             taskForm.reset();
             clearTaskFormErrors();
-            updateTasksView();
         });
 
         // Limpiar errores visuales al resetear el formulario
@@ -78,23 +80,40 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Delegación de eventos para eliminar tareas
+    // Delegación de eventos para acciones en la lista de tareas
     if (tasksContainer) {
         tasksContainer.addEventListener('click', (event) => {
-            const deleteButton = event.target.closest('.btn-delete');
-            if (!deleteButton) return;
+            // Verificar si el clic fue en el botón de completar tarea
+            const doneButton = event.target.closest('.done-button');
+            if (doneButton && !doneButton.disabled) {
+                // Usar recorrido del DOM para encontrar el elemento contenedor de la tarea
+                const taskElement = doneButton.closest('.task-card') || doneButton.parentElement;
+                if (!taskElement) return;
 
-            const taskId = deleteButton.dataset.taskId;
-            taskManager.deleteTask(taskId);
+                // Obtener el id desde el atributo de datos y convertirlo a Number
+                const taskId = Number(taskElement.dataset.taskId);
 
-            const card = deleteButton.closest('.task-card');
-            if (card) {
-                card.remove();
+                // Buscar la tarea por su id y actualizar su estado a HECHO
+                const task = taskManager.getTaskById(taskId);
+                if (task) {
+                    task.estado = 'HECHO';
+                    renderTasks();
+                }
+                return;
             }
 
-            updateTasksView();
+            // Verificar si el clic fue en el botón de eliminar tarea
+            const deleteButton = event.target.closest('.btn-delete');
+            if (deleteButton) {
+                const taskElement = deleteButton.closest('.task-card') || deleteButton.parentElement;
+                if (!taskElement) return;
+
+                const taskId = Number(taskElement.dataset.taskId);
+                taskManager.deleteTask(taskId);
+                renderTasks();
+            }
         });
     }
 
-    updateTasksView();
+    renderTasks();
 });

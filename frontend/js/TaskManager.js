@@ -31,6 +31,11 @@ class TaskManager {
         return newTask;
     }
 
+    getTaskById(taskId) {
+        const numericId = Number(taskId);
+        return this.tasks.find(task => task.id === numericId) || null;
+    }
+
     deleteTask(taskId) {
         const numericId = Number(taskId);
         const initialLength = this.tasks.length;
@@ -39,8 +44,7 @@ class TaskManager {
     }
 
     updateTask(taskId, status) {
-        const numericId = Number(taskId);
-        const task = this.tasks.find(t => t.id === numericId);
+        const task = this.getTaskById(taskId);
         if (task) {
             task.estado = status;
             return task;
@@ -49,13 +53,22 @@ class TaskManager {
     }
 
     assignTask(taskId, assignee) {
-        const numericId = Number(taskId);
-        const task = this.tasks.find(t => t.id === numericId);
+        const task = this.getTaskById(taskId);
         if (task) {
             task.asignadoA = assignee;
             return task;
         }
         return null;
+    }
+
+    render(container = (typeof document !== 'undefined' ? document.getElementById('tasks-container') : null)) {
+        if (!container || typeof document === 'undefined') return;
+        container.innerHTML = '';
+        this.tasks.forEach(task => {
+            if (typeof createTaskCard === 'function') {
+                container.appendChild(createTaskCard(task));
+            }
+        });
     }
 }
 
