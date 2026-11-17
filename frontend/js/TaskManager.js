@@ -63,7 +63,11 @@ class TaskManager {
 
     render(container = (typeof document !== 'undefined' ? document.getElementById('tasks-container') : null)) {
         if (!container || typeof document === 'undefined') return;
-        container.innerHTML = '';
+        if (typeof container.replaceChildren === 'function') {
+            container.replaceChildren();
+        } else {
+            container.innerHTML = '';
+        }
         this.tasks.forEach(task => {
             if (typeof createTaskCard === 'function') {
                 container.appendChild(createTaskCard(task));
