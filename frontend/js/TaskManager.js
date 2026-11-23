@@ -1,7 +1,43 @@
 class TaskManager {
-    constructor() {
+    constructor(storageAdapter = (typeof taskStorage !== 'undefined' ? taskStorage : null)) {
         this.tasks = [];
         this.currentId = 1;
+        this.storageAdapter = storageAdapter;
+    }
+
+    save() {
+        if (this.storageAdapter && typeof this.storageAdapter.save === 'function') {
+            return this.storageAdapter.save(this.tasks, this.currentId);
+        }
+        if (typeof window !== 'undefined' && window.localStorage) {
+            window.localStorage.setItem('tasks', JSON.stringify(this.tasks));
+            window.localStorage.setItem('currentId', String(this.currentId));
+            return true;
+        }
+        return false;
+    }
+
+    load() {
+        if (this.storageAdapter && typeof this.storageAdapter.load === 'function') {
+            const data = this.storageAdapter.load();
+            if (data && Array.isArray(data.tasks)) {
+                this.tasks = data.tasks;
+                this.currentId = Number(data.currentId) || 1;
+                return true;
+            }
+        }
+        if (typeof window !== 'undefined' && window.localStorage) {
+            const rawTasks = window.localStorage.getItem('tasks');
+            const rawId = window.localStorage.getItem('currentId');
+            if (rawTasks) {
+                this.tasks = JSON.parse(rawTasks);
+            }
+            if (rawId) {
+                this.currentId = Number(rawId);
+            }
+            return true;
+        }
+        return false;
     }
 
     getAllTasks() {
@@ -28,34 +64,58 @@ class TaskManager {
         }
 
         this.tasks.push(newTask);
+        this.save();
         return newTask;
+    }
+
+    getTaskById(taskId) {
+        const numericId = Number(taskId);
+        return this.tasks.find(task => task.id === numericId) || null;
     }
 
     deleteTask(taskId) {
         const numericId = Number(taskId);
         const initialLength = this.tasks.length;
         this.tasks = this.tasks.filter(task => task.id !== numericId);
-        return this.tasks.length < initialLength;
+        const wasDeleted = this.tasks.length < initialLength;
+        if (wasDeleted) {
+            this.save();
+        }
+        return wasDeleted;
     }
 
     updateTask(taskId, status) {
-        const numericId = Number(taskId);
-        const task = this.tasks.find(t => t.id === numericId);
+        const task = this.getTaskById(taskId);
         if (task) {
             task.estado = status;
+            this.save();
             return task;
         }
         return null;
     }
 
     assignTask(taskId, assignee) {
-        const numericId = Number(taskId);
-        const task = this.tasks.find(t => t.id === numericId);
+        const task = this.getTaskById(taskId);
         if (task) {
             task.asignadoA = assignee;
+            this.save();
             return task;
         }
         return null;
+    }
+
+    render(container = (typeof document !== 'undefined' ? document.getElementById('tasks-container') : null)) {
+        if (!container || typeof document === 'undefined') return;
+        if (typeof container.replaceChildren === 'function') {
+            container.replaceChildren();
+        } else {
+            container.innerHTML = '';
+        }
+        this.tasks.forEach(task => {
+            if (typeof createTaskCard === 'function') {
+                container.appendChild(createTaskCard(task));
+            }
+        });
     }
 }
 

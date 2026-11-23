@@ -119,7 +119,33 @@
 .task-card-actions {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
     margin-top: 0.25rem;
+}
+
+.btn-done {
+    background-color: #dcfce7;
+    color: #166534;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.85rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid #bbf7d0;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-done:hover:not(:disabled) {
+    background-color: #16a34a;
+    color: #ffffff;
+}
+
+.btn-done:disabled {
+    background-color: #f1f5f9;
+    color: #94a3b8;
+    border-color: #e2e8f0;
+    cursor: default;
 }
 
 .btn-delete {

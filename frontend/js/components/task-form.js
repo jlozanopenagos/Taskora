@@ -1,3 +1,11 @@
+function getTodayString() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 function validateTaskForm(taskData) {
     let values;
 
@@ -53,8 +61,12 @@ function validateTaskForm(taskData) {
     }
 
     const cleanDueDate = (values.fechaDeEntrega || '').trim();
+    const todayString = getTodayString();
     if (cleanDueDate.length === 0) {
         errors.fechaDeEntrega = 'Debes seleccionar una fecha de entrega.';
+        isValid = false;
+    } else if (cleanDueDate < todayString) {
+        errors.fechaDeEntrega = 'La fecha de entrega no puede ser anterior a hoy.';
         isValid = false;
     }
 
@@ -99,12 +111,14 @@ function clearTaskFormErrors() {
 
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
+        getTodayString,
         validateTaskForm,
         renderFieldValidation,
         clearTaskFormErrors
     };
 }
 if (typeof window !== 'undefined') {
+    window.getTodayString = getTodayString;
     window.validateTaskForm = validateTaskForm;
     window.renderFieldValidation = renderFieldValidation;
     window.clearTaskFormErrors = clearTaskFormErrors;

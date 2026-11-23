@@ -16,6 +16,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const dueDateInput = document.getElementById('task-due-date');
     const statusInput = document.getElementById('task-status');
 
+    function setMinDueDate() {
+        if (dueDateInput && typeof getTodayString === 'function') {
+            dueDateInput.min = getTodayString();
+        }
+    }
+
+    // Inicializar límite de fecha mínima (hoy) y cargar tareas persistidas
+    setMinDueDate();
+    taskManager.load();
+
     function updateTasksView() {
         const allTasks = taskManager.getAllTasks();
         const count = allTasks.length;
@@ -27,6 +37,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (emptyState) {
             emptyState.style.display = count === 0 ? 'block' : 'none';
         }
+    }
+
+    function renderTasks() {
+        if (typeof taskManager.render === 'function' && tasksContainer) {
+            taskManager.render(tasksContainer);
+        }
+        updateTasksView();
     }
 
     if (taskForm) {
@@ -46,21 +63,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 estado: statusInput.value
             };
 
-            const newTask = taskManager.addTask(taskData);
-            const taskCardElement = createTaskCard(newTask);
-
-            if (tasksContainer) {
-                tasksContainer.appendChild(taskCardElement);
-            }
+            taskManager.addTask(taskData);
+            renderTasks();
 
             taskForm.reset();
             clearTaskFormErrors();
-            updateTasksView();
         });
 
-        // Limpiar errores visuales al resetear el formulario
+        // Limpiar errores visuales y restaurar fecha mínima al resetear el formulario
         taskForm.addEventListener('reset', () => {
-            setTimeout(clearTaskFormErrors, 0);
+            setTimeout(() => {
+                clearTaskFormErrors();
+                setMinDueDate();
+            }, 0);
         });
 
         // Limpiar el mensaje de error del campo que se está editando
@@ -78,23 +93,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Delegación de eventos para eliminar tareas
+    // Delegación de eventos para acciones en la lista de tareas
     if (tasksContainer) {
         tasksContainer.addEventListener('click', (event) => {
-            const deleteButton = event.target.closest('.btn-delete');
-            if (!deleteButton) return;
+            // Verificar si el clic fue en el botón de completar tarea
+            const doneButton = event.target.closest('.done-button');
+            if (doneButton && !doneButton.disabled) {
+                // Usar recorrido del DOM para encontrar el elemento contenedor de la tarea
+                const taskElement = doneButton.closest('.task-card') || doneButton.parentElement;
+                if (!taskElement) return;
 
-            const taskId = deleteButton.dataset.taskId;
-            taskManager.deleteTask(taskId);
+                // Obtener el id desde el atributo de datos y convertirlo a Number
+                const taskId = Number(taskElement.dataset.taskId);
 
-            const card = deleteButton.closest('.task-card');
-            if (card) {
-                card.remove();
+                // Actualizar el estado de la tarea a HECHO (persiste y actualiza)
+                const updated = taskManager.updateTask(taskId, 'HECHO');
+                if (updated) {
+                    renderTasks();
+                }
+                return;
             }
 
-            updateTasksView();
+            // Verificar si el clic fue en el botón de eliminar tarea
+            const deleteButton = event.target.closest('.btn-delete');
+            if (deleteButton) {
+                const taskElement = deleteButton.closest('.task-card') || deleteButton.parentElement;
+                if (!taskElement) return;
+
+                const taskId = Number(taskElement.dataset.taskId);
+                taskManager.deleteTask(taskId);
+                renderTasks();
+            }
         });
     }
 
-    updateTasksView();
+    renderTasks();
 });
