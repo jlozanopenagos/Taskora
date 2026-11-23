@@ -1,6 +1,7 @@
 class TaskLocalStorageAdapter {
-    constructor(storageKey = 'taskora_tasks_data') {
-        this.storageKey = storageKey;
+    constructor(tasksKey = 'tasks', currentIdKey = 'currentId') {
+        this.tasksKey = tasksKey;
+        this.currentIdKey = currentIdKey;
     }
 
     save(tasks, currentId) {
@@ -8,11 +9,9 @@ class TaskLocalStorageAdapter {
             return false;
         }
         try {
-            const payload = JSON.stringify({
-                tasks: Array.isArray(tasks) ? tasks : [],
-                currentId: Number(currentId) || 1
-            });
-            window.localStorage.setItem(this.storageKey, payload);
+            const tasksString = JSON.stringify(Array.isArray(tasks) ? tasks : []);
+            window.localStorage.setItem(this.tasksKey, tasksString);
+            window.localStorage.setItem(this.currentIdKey, String(Number(currentId) || 1));
             return true;
         } catch (error) {
             console.error('Error al guardar tareas en localStorage:', error);
@@ -25,14 +24,28 @@ class TaskLocalStorageAdapter {
             return { tasks: [], currentId: 1 };
         }
         try {
-            const raw = window.localStorage.getItem(this.storageKey);
-            if (!raw) {
+            const rawTasks = window.localStorage.getItem(this.tasksKey);
+            const rawId = window.localStorage.getItem(this.currentIdKey);
+
+            // Fallback retrocompatible con la clave combinada previa
+            if (!rawTasks && !rawId) {
+                const legacy = window.localStorage.getItem('taskora_tasks_data');
+                if (legacy) {
+                    const parsedLegacy = JSON.parse(legacy);
+                    return {
+                        tasks: Array.isArray(parsedLegacy.tasks) ? parsedLegacy.tasks : [],
+                        currentId: Number(parsedLegacy.currentId) || 1
+                    };
+                }
                 return { tasks: [], currentId: 1 };
             }
-            const parsed = JSON.parse(raw);
+
+            const tasks = rawTasks ? JSON.parse(rawTasks) : [];
+            const currentId = rawId ? Number(rawId) : 1;
+
             return {
-                tasks: Array.isArray(parsed.tasks) ? parsed.tasks : [],
-                currentId: Number(parsed.currentId) || 1
+                tasks: Array.isArray(tasks) ? tasks : [],
+                currentId: isNaN(currentId) ? 1 : currentId
             };
         } catch (error) {
             console.error('Error al cargar tareas desde localStorage:', error);
@@ -45,7 +58,9 @@ class TaskLocalStorageAdapter {
             return false;
         }
         try {
-            window.localStorage.removeItem(this.storageKey);
+            window.localStorage.removeItem(this.tasksKey);
+            window.localStorage.removeItem(this.currentIdKey);
+            window.localStorage.removeItem('taskora_tasks_data');
             return true;
         } catch (error) {
             console.error('Error al limpiar localStorage:', error);

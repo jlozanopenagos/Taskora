@@ -9,6 +9,11 @@ class TaskManager {
         if (this.storageAdapter && typeof this.storageAdapter.save === 'function') {
             return this.storageAdapter.save(this.tasks, this.currentId);
         }
+        if (typeof window !== 'undefined' && window.localStorage) {
+            window.localStorage.setItem('tasks', JSON.stringify(this.tasks));
+            window.localStorage.setItem('currentId', String(this.currentId));
+            return true;
+        }
         return false;
     }
 
@@ -20,6 +25,17 @@ class TaskManager {
                 this.currentId = Number(data.currentId) || 1;
                 return true;
             }
+        }
+        if (typeof window !== 'undefined' && window.localStorage) {
+            const rawTasks = window.localStorage.getItem('tasks');
+            const rawId = window.localStorage.getItem('currentId');
+            if (rawTasks) {
+                this.tasks = JSON.parse(rawTasks);
+            }
+            if (rawId) {
+                this.currentId = Number(rawId);
+            }
+            return true;
         }
         return false;
     }

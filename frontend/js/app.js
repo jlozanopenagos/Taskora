@@ -106,10 +106,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Obtener el id desde el atributo de datos y convertirlo a Number
                 const taskId = Number(taskElement.dataset.taskId);
 
-                // Buscar la tarea por su id y actualizar su estado a HECHO
-                const task = taskManager.getTaskById(taskId);
-                if (task) {
-                    task.estado = 'HECHO';
+                // Actualizar el estado de la tarea a HECHO (persiste y actualiza)
+                const updated = taskManager.updateTask(taskId, 'HECHO');
+                if (updated) {
                     renderTasks();
                 }
                 return;
